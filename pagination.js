@@ -71,4 +71,3 @@
 		return methods[name]?methods[name].apply(this,Array.prototype.slice.call(arguments,1)):typeof name=='object'||!name?methods.init.apply(this,arguments):0;
 	};
 })(jQuery);
-$('.pagination').pagination({items:40,active:1,disabled:[1,4]})
