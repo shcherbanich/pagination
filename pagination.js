@@ -16,16 +16,16 @@
 			var o=this.data('pagination');return o.disabledNoClick&&~o.disabled.indexOf(+num)?0:o.active=num,this.pagination('build')
 		},
 		setFirstPage:function(){
-			return this.pagination('active',1)
+			return this.pagination('_getNearPage',1,1)
 		},
 		setLastPage:function(){	
 			return this.pagination('active',this.pagination('_getPage',this.pagination('display').max))
 		},
 		nextPage:function(){
-			var o=this.data('pagination');++o.active>this.pagination('_getPage',o.items)?--o.active:0;return this.pagination('build')
+			return this.pagination('_getNearPage',1)
 		},
 		prevPage:function(){
-			var o=this.data('pagination');--o.active?0:++o.active;return this.pagination('build')
+			return this.pagination('_getNearPage')
 		},
 		getActive:function(){
 			return this.data('pagination').active
@@ -36,8 +36,8 @@
 		theme:function(name){
 			return this.data('pagination').theme=name,this.pagination('_setTheme')
 		},
-		_getNearPage:function(num,ltr){
-			var o=this.data('pagination'),m=this.pagination('_getPage',o.items);for(var i=num;ltr?i>1:i<m;ltr?i--:i++)if(!~o.disabled.indexOf(i))break;return i
+		_getNearPage:function(ltr,num){
+			var j,o=this.data('pagination'),pages=this.pagination('_getPage',o.items);num?o.active=num:0;var tmp=o.active;num?0:ltr?++o.active>pages?--o.active:0:--o.active?0:++o.active;if(o.disabledNoClick){for(var i=o.active;ltr?i<=pages:i>=1;ltr?i++:i--)if(!~this.data('pagination').disabled.indexOf(i)){j=i;break}o.active=j?j:tmp;}return this.pagination('build')
 		},
 		_setTheme:function(){
 			return this.children('ul').removeClass().addClass(this.data('pagination').theme).parent().pagination('build')
@@ -52,7 +52,7 @@
 										active:1,
 										disabled:[],
 										hideUn:true,
-										useTplHidden:false,
+										useTplHidden:true,
 										disabledNoClick:true,
 										show:5,
 										templatePrev:'<a href="#0">«</a>',
