@@ -1,7 +1,7 @@
 (function($,undefined){
 	var methods = {
 		build:function(){
-			var sep,o=this.data('pagination'),max=this.pagination('_getPage',o.items),l='</li>',d='class="disabled"',elements=(o.templatePrev?'<li id="prev"'+(o.active==1?d:'')+'>'+o.templatePrev+l:''),sep=o.active-o.show/2+1|0,start=(o.hideUn?sep<1?1:max-sep<o.show?max-o.show+1:sep:1)||1,stop=o.hideUn?o.show+start>max?max:o.show+start-1:max;o.useTplHidden&&start>1&&o.templateHidden?elements+='<li id="hiddenPrev"'+d+'>'+o.templateHidden+l:0;for(var i=start;i<=stop;i++)disabled=~o.disabled.indexOf(i)?1:0,elements+='<li class="act'+(o.active==i?' active':disabled?' disabled':'')+'"data-num="'+i+'">'+(o.active==i?o.templateActive.replace(/\$num/g,i):disabled?o.templateDisabled.replace(/\$num/g,i):o.templateLinks.replace(/\$num/g,i))+l;o.useTplHidden&&stop!=max&&o.templateHidden?elements+='<li id="hiddenNext"'+d+'>'+o.templateHidden+l:0;o.templateNext?elements+='<li id="next"'+(o.active==max?d:'')+'>'+o.templateNext+l:0;return this.children('ul').empty().append(elements).parent().each(function(){var self=$(this),t=self.children();t.children('.act').bind('click',function(){o.activeAction(self,$(this).attr("data-num"))}).parent().children('#next').bind('click',function(){o.nextAction(self)}).parent().children('#prev').bind('click',function(){o.prevAction(self)}).parent().children('#hiddenPrev').bind('click',function(){o.hiddenPrevAction(self)});t.children('#hiddenNext').bind('click',function(){o.hiddenNextAction(self)})})
+			var sep,o=this.data('pagination'),max=this.pagination('_getPage',o.items),l='</li>',d='class="disabled"';elements=(o.templatePrev?'<li id="prev"'+(o.active<=(o.disabledNoClick?this.pagination('_getFirstPage',max):1)?d:'')+'>'+o.templatePrev+l:''),sep=o.active-o.show/2+1|0,start=(o.hideUn?sep<1?1:max-sep<o.show?max-o.show+1:sep:1)||1,stop=o.hideUn?o.show+start>max?max:o.show+start-1:max;o.useTplHidden&&start>1&&o.templateHidden?elements+='<li id="hiddenPrev"'+d+'>'+o.templateHidden+l:0;for(var i=start;i<=stop;i++)disabled=~o.disabled.indexOf(i)?1:0,elements+='<li class="act'+(o.active==i?' active':disabled?' disabled':'')+'"data-num="'+i+'">'+(o.active==i?o.templateActive.replace(/\$num/g,i):disabled?o.templateDisabled.replace(/\$num/g,i):o.templateLinks.replace(/\$num/g,i))+l;o.useTplHidden&&stop!=max&&o.templateHidden?elements+='<li id="hiddenNext"'+d+'>'+o.templateHidden+l:0;o.templateNext?elements+='<li id="next"'+(o.active>=(o.disabledNoClick?this.pagination('_getLastPage',max):max)?d:'')+'>'+o.templateNext+l:0;return this.children('ul').empty().append(elements).parent().each(function(){var self=$(this),t=self.children();t.children('.act').bind('click',function(){o.activeAction(self,$(this).attr("data-num"))}).parent().children('#next').bind('click',function(){o.nextAction(self)}).parent().children('#prev').bind('click',function(){o.prevAction(self)}).parent().children('#hiddenPrev').bind('click',function(){o.hiddenPrevAction(self)});t.children('#hiddenNext').bind('click',function(){o.hiddenNextAction(self)})})
 		}, 
 		display:function(page){
 			var o=this.data('pagination'),m=this.pagination('_getPage',o.items),max=o.pageItems*(page>m?m:page);return{min:o.pageItems?page?max-o.pageItems+1:0:0,max:o.pageItems?page<m?max:o.items:0}
@@ -19,7 +19,7 @@
 			return this.pagination('_getNearPage',1,1)
 		},
 		setLastPage:function(){	
-			return this.pagination('active',this.pagination('_getPage',this.pagination('display').max))
+			return this.pagination('_getNearPage',0,this.pagination('_getPage',this.pagination('display').max))
 		},
 		nextPage:function(){
 			return this.pagination('_getNearPage',1)
@@ -36,8 +36,20 @@
 		theme:function(name){
 			return this.data('pagination').theme=name,this.pagination('_setTheme')
 		},
+		off:function(){
+			var o=this.data('pagination'),i=0;o.disabled=[];for(i;i<=this.pagination('_getPage',this.pagination('display').max);i++)o.disabled.push(i);return this.pagination('build')	
+		},
+		on:function(){
+			var o=this.data('pagination');return o.disabled=[],this.pagination('build')
+		},
 		_getNearPage:function(ltr,num){
-			var j,o=this.data('pagination'),pages=this.pagination('_getPage',o.items);num?o.active=num:0;var tmp=o.active;num?0:ltr?++o.active>pages?--o.active:0:--o.active?0:++o.active;if(o.disabledNoClick){for(var i=o.active;ltr?i<=pages:i>=1;ltr?i++:i--)if(!~this.data('pagination').disabled.indexOf(i)){j=i;break}o.active=j?j:tmp;}return this.pagination('build')
+			var j,o=this.data('pagination'),pages=this.pagination('_getPage',o.items);num?o.active=num:0;var tmp=o.active;num?0:ltr?++o.active>pages?--o.active:0:--o.active?0:++o.active;if(o.disabledNoClick){for(var i=o.active;ltr?i<=pages:i>=1;ltr?i++:i--)if(!~this.data('pagination').disabled.indexOf(i)){j=i;break}o.active=j?j:tmp}return this.pagination('build')
+		},
+		_getFirstPage:function(pages){
+			var o=this.data('pagination'),i=1;for(i;i<=pages;i++)if(!~o.disabled.indexOf(i))return i;
+		},
+		_getLastPage:function(pages){
+			var o=this.data('pagination'),i=pages;for(i;i>0;i--)if(!~o.disabled.indexOf(i))return i;
 		},
 		_setTheme:function(){
 			return this.children('ul').removeClass().addClass(this.data('pagination').theme).parent().pagination('build')
@@ -52,7 +64,7 @@
 										active:1,
 										disabled:[],
 										hideUn:true,
-										useTplHidden:true,
+										useTplHidden:false,
 										disabledNoClick:true,
 										show:5,
 										templatePrev:'<a href="#0">«</a>',
