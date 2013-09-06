@@ -80,7 +80,7 @@
 										hiddenNextAction:function(self){self.pagination('setLastPage')},
 										theme:'default',
 										onInit:function(self){}
-							},object);this.data('pagination',settings).html('<ul></ul>'),this.length?(this.pagination('_setTheme'),settings.onInit.call(this)):0;return this
+							},object);this.data('pagination',settings).html('<ul></ul>'),this.length?(this.pagination('_setTheme'),settings.onInit.call(this,$(this))):0;return this
 		} 
 	}
 	$.fn.pagination=function(name){
